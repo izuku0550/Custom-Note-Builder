@@ -1,0 +1,181 @@
+import { TextEdit , GridBox, Button, HorizontalBox , ComboBox, VerticalBox} from "std-widgets.slint";
+import "fonts/Segoe_UI.ttf";
+
+component BootloaderScreen inherits Rectangle {
+    width: 591px;
+    height: 307px;
+    background: black;
+    border-width: 1px;
+    TextEdit {
+        width: parent.width;
+        height: parent.height;
+        font-size: 11px;
+        text: "Created by KimWang906. Click here to change the text!";
+    }
+}
+
+component IconStatus inherits Rectangle {
+    width: 64px;
+    height: 64px;
+    background: gray;
+    border-width: 2px;
+    border-color: black;
+    y: 20px;
+}
+
+component IconPathText inherits Rectangle {
+    width: 128px;
+    height: 20px;
+    border-width: 2px;
+    border-color: black;
+    background: white;
+    TextInput {
+        x: 3px;
+        read-only: true;
+        font-size: 14px;
+        color: black;
+    }
+}
+
+component IconButton {
+    HorizontalBox {
+        spacing: 5px;
+        Button {
+            text: "Change Icon";
+        }
+        Button {
+            text: "Clear";
+        }
+     }
+}
+
+component OptionBox inherits Rectangle {
+    in property <string> title;
+    // width: 200px;
+    // height: 130px;
+    Text {
+        x: 10px;
+        y: 10px;
+        width: self.preferred-width;
+        height: self.preferred-height;
+        text: title;
+    }
+    Rectangle {
+        x: 80px;
+        y: 10px;
+        width: 128px;
+        height: 20px;
+        background: white;
+        border-width: 2px;
+        border-color: black;
+        TextInput {
+            width: parent.width - 4px; // 테두리 두께를 고려하여 TextInput의 크기를 조절합니다.
+            height: parent.height - 4px; // 테두리 두께를 고려하여 TextInput의 크기를 조절합니다.
+            color: black;
+        }
+    }
+}
+
+component OptionComboBox inherits Rectangle {
+    in property <string> title;
+    in property <[string]> values;
+    in property <string> curr;
+    // width: 200px;
+    // height: 130px;
+    Text {
+        x: 10px;
+        y: 10px;
+        width: self.preferred-width;
+        height: self.preferred-height;
+        text: title;
+    }
+    ComboBox { 
+        x: 80px;
+        y: 10px;
+        current-value: curr;
+        model: values;
+     }
+}
+
+component IconFunc {
+    VerticalBox {
+        spacing: 0px;
+        IconButton {}
+        IconPathText {}
+    }
+}
+
+component CustomOption {
+    VerticalBox {
+        spacing: 0px;
+        OptionBox {
+            title: "Text Color:";
+        }
+        OptionBox {
+            title: "Font Color:";
+        }
+        OptionComboBox {
+            title: "Ending:";
+            values: ["BSOD", "Reboot", "Nothing"];
+            curr: "BSOD";
+        }
+    }
+}
+
+component BuildInfo {
+    VerticalBox {
+        spacing: 10px;
+        Button {
+            text: "Build";
+        }
+        Button {
+            text: "Info";
+        }
+    }
+}
+
+export component MainWindow inherits Window {
+    default-font-family: "Segoe UI";
+    width: 609px;
+    height: 426px;
+    HorizontalLayout {
+        spacing: 0px;
+        GridLayout {
+            padding: 5px;
+            Row {
+                IconStatus {}
+            }
+            Row {
+                IconFunc {
+                    col: 1;
+                    row: 0;
+                }
+            }
+            Row {
+                CustomOption {
+                    col: 2;
+                    row: 0;
+                }
+            }
+            Row {
+                BuildInfo {
+                    col: 3;
+                    row: 0;
+                }
+            }
+        }
+    }
+
+    HorizontalLayout {
+        spacing: 0px;
+        alignment: center;
+        VerticalLayout {
+            alignment:center; 
+            Rectangle{
+                height: 100px;
+                background : transparent;
+            }
+            BootloaderScreen {}
+        }
+    }
+}

@@ -7,3 +7,6 @@ edition = "2021"
 
 [dependencies]
 slint = { version = "1.1.0", features = ["backend-winit-x11"] }
+
+[build-dependencies]
+slint-build = "1.1"
