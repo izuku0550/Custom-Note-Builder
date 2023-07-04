@@ -1,6 +1,16 @@
 import { TextEdit , GridBox, Button, HorizontalBox , ComboBox, VerticalBox} from "std-widgets.slint";
 import "fonts/Segoe_UI.ttf";
 
+export global CustomNoteBuilder_Logic {
+    in-out property <image> path;
+    in-out property <string> file_name;
+    callback change_icon_pressed();
+    callback path_clear_pressed();
+    callback load_icon();
+    callback info_pressed();
+    callback build();
+}
+
 component BootloaderScreen inherits Rectangle {
     width: 591px;
     height: 307px;
@@ -15,15 +25,22 @@ component BootloaderScreen inherits Rectangle {
 }
 
 component IconStatus inherits Rectangle {
+    in property <image> load_path <=> CustomNoteBuilder_Logic.path;
     width: 64px;
     height: 64px;
     background: gray;
     border-width: 2px;
     border-color: black;
     y: 20px;
+    Image {
+        source: load-path;
+        width: parent.width - 2px;
+        height: parent.height - 2px;
+    }
 }
 
-component IconPathText inherits Rectangle {
+component IconFilenameText inherits Rectangle {
+    in property <string> file_name;
     width: 128px;
     height: 20px;
     border-width: 2px;
@@ -31,6 +48,7 @@ component IconPathText inherits Rectangle {
     background: white;
     TextInput {
         x: 3px;
+        text: file-name;
         read-only: true;
         font-size: 14px;
         color: black;
@@ -42,9 +60,15 @@ component IconButton {
         spacing: 5px;
         Button {
             text: "Change Icon";
+            clicked => {
+                CustomNoteBuilder-Logic.change-icon-pressed();
+            }
         }
         Button {
             text: "Clear";
+            clicked => {
+                CustomNoteBuilder-Logic.path-clear-pressed();
+            }
         }
      }
 }
@@ -98,10 +122,13 @@ component OptionComboBox inherits Rectangle {
 }
 
 component IconFunc {
+    in property <string> load_filename <=> CustomNoteBuilder-Logic.file-name;
     VerticalBox {
         spacing: 0px;
         IconButton {}
-        IconPathText {}
+        IconFilenameText {
+            file-name: load-filename;
+        }
     }
 }
 
@@ -127,14 +154,21 @@ component BuildInfo {
         spacing: 10px;
         Button {
             text: "Build";
+            clicked => {
+                CustomNoteBuilder-Logic.build();
+            }
         }
         Button {
             text: "Info";
+            clicked => {
+                CustomNoteBuilder-Logic.info-pressed();
+            }
         }
     }
 }
 
 export component MainWindow inherits Window {
+    title: "Custom Note Builder";
     default-font-family: "Segoe UI";
     width: 609px;
     height: 426px;
