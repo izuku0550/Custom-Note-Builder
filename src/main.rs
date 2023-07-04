@@ -36,7 +36,8 @@ fn main() -> Result<(), slint::PlatformError> {
                 hInstance: HMODULE(0),
                 lpstrFilter: PCWSTR(
                     HSTRING::from(
-                        "Icon Files (*.ico)\0*.ico\0All Files (*.*)\0*.*\0".trim_end_matches('\0'),
+                        "Image Files (*.ico;*.jpg;*.png)\0*.ico;*.jpg;*.png\0"
+                            .trim_end_matches('\0'), // "Icon Files (*.ico)\0*.ico\0All Files (*.*)\0*.*\0".trim_end_matches('\0')
                     )
                     .as_ptr(),
                 ),
