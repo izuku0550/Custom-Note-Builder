@@ -1,6 +1,9 @@
 use std::{path::Path, sync::Arc};
 
+use color::{Color, ColorCode};
+use payload::{Ending, ProgramData};
 use slint::{Image, SharedString};
+
 use windows::{
     core::{HSTRING, PCWSTR, PWSTR},
     Win32::{
@@ -16,9 +19,12 @@ use windows::{
 };
 
 slint::include_modules!();
+mod color;
+mod payload;
 
 fn main() -> Result<(), slint::PlatformError> {
     let main_window = MainWindow::new()?;
+    let handle = main_window.clone_strong();
     let weak = Arc::new(main_window.as_weak());
 
     // Load Icon Path
@@ -69,9 +75,9 @@ fn main() -> Result<(), slint::PlatformError> {
                 let path = Path::new(&convert_data);
                 let file_name = path.file_name().unwrap().to_str().unwrap();
                 app.global::<CustomNoteBuilder_Logic>()
-                    .set_file_name(SharedString::from(file_name.replace("\0", "")));
+                    .set_file_name(SharedString::from(file_name.replace('\0', "")));
                 app.global::<CustomNoteBuilder_Logic>()
-                    .set_path(Image::load_from_path(path).expect("Failed load to image"));
+                    .set_image(Image::load_from_path(path).expect("Failed load to image"));
                 app.window().request_redraw();
             }
         });
@@ -85,32 +91,49 @@ fn main() -> Result<(), slint::PlatformError> {
             app.global::<CustomNoteBuilder_Logic>()
                 .set_file_name(SharedString::default());
             app.global::<CustomNoteBuilder_Logic>()
-                .set_path(Image::default());
+                .set_image(Image::default());
             app.window().request_redraw();
         });
 
     // Get Information
+    main_window
+        .global::<CustomNoteBuilder_Logic>()
+        .on_info_pressed(move || unsafe {
+            ShellExecuteW(
+                HWND::default(),
+                PCWSTR(HSTRING::from("open".trim_end_matches('\0')).as_ptr()),
+                PCWSTR(
+                    HSTRING::from(
+                        "https://github.com/izuku0550/Custom-Note-Builder".trim_end_matches('\0'),
+                    )
+                    .as_ptr(),
+                ),
+                PCWSTR::null(),
+                PCWSTR::null(),
+                SW_SHOWMAXIMIZED,
+            );
+        });
+
+    // // On Boot Message
+    // let wrap_weak = Arc::clone(&weak);
+    // let app = wrap_weak.unwrap();
+
+    // Run Build
     let wrap_weak = Arc::clone(&weak);
     main_window
         .global::<CustomNoteBuilder_Logic>()
-        .on_info_pressed(move || {
-            let _app = wrap_weak.unwrap();
-            unsafe {
-                ShellExecuteW(
-                    HWND::default(),
-                    PCWSTR(HSTRING::from("open".trim_end_matches('\0')).as_ptr()),
-                    PCWSTR(
-                        HSTRING::from(
-                            "https://github.com/izuku0550/Custom-Note-Builder"
-                                .trim_end_matches('\0'),
-                        )
-                        .as_ptr(),
-                    ),
-                    PCWSTR::null(),
-                    PCWSTR::null(),
-                    SW_SHOWMAXIMIZED,
-                );
-            }
+        .on_build(move || {
+            let icon = handle.get_icon_data();
+            let data = ProgramData {
+                msg: handle.get_boot_msg().to_string(),
+                color: ColorCode::new(
+                    Color::from(handle.get_text_color().as_str()),
+                    Color::from(handle.get_font_color().as_str()),
+                ),
+                ending_option: Ending::from(handle.get_ending_option().as_str()),
+                icon_path: icon.path(),
+            };
+            
         });
     main_window.run()
 }
